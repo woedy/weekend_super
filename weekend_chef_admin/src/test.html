@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapbox Test</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+</head>
+<body>
+  <div id="map" style="height: 500px;"></div>
+  <script>
+    // Replace with your actual Mapbox access token
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZGVsYWRlbS1waW5nc2hpcCIsImEiOiJjbTVwNGtuYnowcjUzMmlzOHYxcXd5YWkxIn0.nKSC4i5LZk2_QT0xh-WQSg';
+    
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11', // You can change the style
+      center: [-74.5, 40], // Center on specific coordinates
+      zoom: 9
+    });
+  </script>
+</body>
+</html>
