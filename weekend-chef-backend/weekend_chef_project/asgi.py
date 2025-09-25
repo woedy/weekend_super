@@ -9,8 +9,17 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 
 import os
 
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
+
+from weekend_chef_project.routing import websocket_urlpatterns
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'weekend_chef_project.settings')
 
-application = get_asgi_application()
+dj_application = get_asgi_application()
+
+application = ProtocolTypeRouter({
+    "http": dj_application,
+    "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+})

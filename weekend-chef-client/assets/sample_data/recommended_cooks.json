@@ -1,0 +1,92 @@
+{
+  "chefs": [
+    {
+      "id": "chef_amarachi",
+      "displayName": "Chef Amarachi",
+      "tagline": "Plant-forward West African comfort",
+      "cuisines": ["Nigerian", "West African"],
+      "dietaryTags": ["vegetarian", "gluten_free"],
+      "locationName": "Yaba, Lagos",
+      "latitude": 6.517,
+      "longitude": 3.386,
+      "averageRating": 4.9,
+      "totalReviews": 126,
+      "heroImage": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4",
+      "nextAvailable": "2024-08-16T17:00:00Z",
+      "startingFrom": 42.5,
+      "groceryAdvanceEstimate": 18.0,
+      "menuItems": [
+        {
+          "id": "menu_egusi_green",
+          "name": "Egusi greens bowl",
+          "description": "Spinach and egusi with grilled plantain, served with fonio.",
+          "photo": "https://images.unsplash.com/photo-1499028344343-cd173ffc68a9",
+          "basePortions": [
+            {"id": "small", "label": "Solo", "price": 14.0},
+            {"id": "medium", "label": "Sharing", "price": 24.0},
+            {"id": "large", "label": "Family", "price": 38.0}
+          ],
+          "addons": [
+            {"id": "addon_plantain", "label": "Extra plantain", "price": 3.0},
+            {"id": "addon_mushroom", "label": "Smoked mushrooms", "price": 4.5}
+          ],
+          "groceryAdvance": 16.0,
+          "platformFee": 2.8,
+          "dietary": ["vegetarian", "gluten_free"]
+        },
+        {
+          "id": "menu_jollof_sundays",
+          "name": "Sunday jollof tray",
+          "description": "Smoky jollof rice with roasted veggies and peppered tofu.",
+          "photo": "https://images.unsplash.com/photo-1473093226795-af9932fe5856",
+          "basePortions": [
+            {"id": "medium", "label": "6 people", "price": 55.0},
+            {"id": "large", "label": "10 people", "price": 88.0}
+          ],
+          "addons": [
+            {"id": "addon_zobo", "label": "Zobo hibiscus tea", "price": 12.0},
+            {"id": "addon_salad", "label": "Kale salad bowl", "price": 10.0}
+          ],
+          "groceryAdvance": 32.0,
+          "platformFee": 6.0,
+          "dietary": ["vegan"]
+        }
+      ]
+    },
+    {
+      "id": "chef_luca",
+      "displayName": "Chef Luca",
+      "tagline": "Handmade pasta nights",
+      "cuisines": ["Italian"],
+      "dietaryTags": ["vegetarian"],
+      "locationName": "Ikeja GRA",
+      "latitude": 6.576,
+      "longitude": 3.353,
+      "averageRating": 4.7,
+      "totalReviews": 94,
+      "heroImage": "https://images.unsplash.com/photo-1525755662778-989d0524087e",
+      "nextAvailable": "2024-08-17T18:30:00Z",
+      "startingFrom": 36.0,
+      "groceryAdvanceEstimate": 14.0,
+      "menuItems": [
+        {
+          "id": "menu_truffle_pappardelle",
+          "name": "Truffle pappardelle",
+          "description": "Fresh pasta with truffle butter sauce and parmesan crisps.",
+          "photo": "https://images.unsplash.com/photo-1512058564366-18510be2db19",
+          "basePortions": [
+            {"id": "small", "label": "For 2", "price": 28.0},
+            {"id": "medium", "label": "For 4", "price": 52.0}
+          ],
+          "addons": [
+            {"id": "addon_sourdough", "label": "Garlic sourdough", "price": 6.5},
+            {"id": "addon_tiramisu", "label": "Mini tiramisu", "price": 8.0}
+          ],
+          "groceryAdvance": 18.0,
+          "platformFee": 2.4,
+          "dietary": ["vegetarian"]
+        }
+      ]
+    }
+  ]
+}

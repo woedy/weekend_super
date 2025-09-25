@@ -1,0 +1,22 @@
+{
+  "orders": [
+    {
+      "orderId": "ORD-240815-001",
+      "chefId": "chef_amarachi",
+      "menuItemId": "menu_egusi_green",
+      "status": "cooking",
+      "placedAt": "2024-08-15T10:00:00Z",
+      "total": 42.0,
+      "groceryAdvance": 16.0,
+      "remainingBalance": 24.0,
+      "platformFee": 2.0,
+      "deliveryWindowStart": "2024-08-16T17:00:00Z",
+      "deliveryWindowEnd": "2024-08-16T18:00:00Z",
+      "timeline": [
+        {"status": "pending", "changedAt": "2024-08-15T10:00:00Z"},
+        {"status": "accepted", "changedAt": "2024-08-15T10:10:00Z"},
+        {"status": "cooking", "changedAt": "2024-08-16T14:30:00Z"}
+      ]
+    }
+  ]
+}

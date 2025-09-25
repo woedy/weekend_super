@@ -4,6 +4,7 @@ from orders.api.cart_views import add_cart_item, cart_item_detail_view, delete_c
 from orders.api.chef_orders import change_chef_order_status_view, get_all_chef_orders_view, get_chef_order_details_view
 from orders.api.custom_options_view import add_custom_option, archive_custom_option, delete_custom_option, edit_custom_option_view, get_all_archived_custom_options_view, get_all_custom_options_view, get_custom_option_details_view, unarchive_custom_option
 from orders.api.orders import change_order_status_view, generate_shopping_list_for_order_item, get_all_orders_view, get_order_details_view, make_order_payment_view, place_order_view
+from django.urls import include
 
 
 
@@ -49,6 +50,7 @@ path('generate-shopping-list/', generate_shopping_list_for_order_item, name='gen
     path('change-chef-order-status/', change_chef_order_status_view, name='change_chef_order_status_view'),
     
     path('get-chef-order-details/', get_chef_order_details_view, name='get_chef_order_details_view'),
+    path('v2/', include(('orders.api.v2.urls', 'v2'), namespace='v2')),
 
 
 ]

@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+*.pyo
+*.sqlite3
+/static_cdn
+/media
+/data
+env/
+.git
+.gitignore
+command.txt

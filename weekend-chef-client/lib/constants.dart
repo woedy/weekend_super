@@ -1,47 +1,71 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/services.dart';
-
-const bookPrimary = Color(0xffF94638);
-const bookPrimaryDark = Color(0xFF800A00);
-const bookDark = Color(0xffffffff);
-const bookDark2 = Color(0xff8E8E8E);
-const bookBlack = Color(0xff000000);
-const bookWhite = Color(0xffF8F7FC);
-
-const bodyText1 = Color(0xffffffff);
-const bodyText2 = Color(0xffffffff);
-const clay = Color(0xffa499b3);
-
-//const hostName = "http://92.112.194.239:7575/";
-//const hostNameMedia = "http://92.112.194.239:7575";
-const hostName = "http://192.168.43.121:8000/";
-const hostNameMedia = "http://192.168.43.121:8000";
-
-const PUSHER_API = "88ff191e00149bfda666";
-const PUSHER_CLUSTER = "mt1";
-
-Future<String?> getApiPref() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString("API_Key");
+class AppColors {
+  static const primary = Color(0xFFF94638);
+  static const primaryDark = Color(0xFF800A00);
+  static const onPrimary = Colors.white;
+  static const scaffold = Color(0xFFF8F7FC);
+  static const surface = Colors.white;
+  static const mutedText = Color(0xFF6B6B6B);
+  static const success = Color(0xFF1B998B);
+  static const warning = Color(0xFFEEA243);
+  static const error = Color(0xFFD64550);
+  static const border = Color(0xFFE6E3F3);
 }
 
-Future<String?> getUserIDPref() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString("USER_ID");
+class Spacing {
+  static const nano = 4.0;
+  static const micro = 8.0;
+  static const small = 12.0;
+  static const medium = 16.0;
+  static const large = 24.0;
+  static const xLarge = 32.0;
+  static const xxLarge = 48.0;
 }
 
-Future<String?> getEmailPref() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString("EMAIL");
+class Corners {
+  static const small = Radius.circular(8);
+  static const medium = Radius.circular(16);
+  static const large = Radius.circular(24);
 }
 
-class PasteTextInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    // Allow pasting of text by returning the new value unchanged
-    return newValue;
-  }
+class Shadows {
+  static const soft = [
+    BoxShadow(
+      color: Color(0x14000000),
+      blurRadius: 12,
+      offset: Offset(0, 6),
+    ),
+  ];
+}
+
+class EnvironmentConfig {
+  static const apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:8000/',
+  );
+
+  static const mediaBaseUrl = String.fromEnvironment(
+    'API_MEDIA_BASE_URL',
+    defaultValue: 'http://localhost:8000',
+  );
+
+  static const pusherKey = String.fromEnvironment('PUSHER_KEY');
+  static const pusherCluster = String.fromEnvironment(
+    'PUSHER_CLUSTER',
+    defaultValue: 'mt1',
+  );
+
+  static const paystackPublicKey = String.fromEnvironment('PAYSTACK_PUBLIC_KEY', defaultValue: '');
+}
+
+class PreferenceKeys {
+  static const authToken = 'auth_token';
+  static const locale = 'preferred_locale';
+}
+
+class AnimationDurations {
+  static const short = Duration(milliseconds: 200);
+  static const medium = Duration(milliseconds: 350);
+  static const long = Duration(milliseconds: 600);
 }

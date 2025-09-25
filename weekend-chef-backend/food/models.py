@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
@@ -77,10 +78,10 @@ class FoodPairing(models.Model):
 
 class CustomizationOption(models.Model):
     OPTION_TYPES = [
-        ('Meat', 'Meat'),
-        ('Spice', 'Spice'),
-        ('Dough Type', 'Dough Type'),
-
+        ('Portion', 'Portion Size'),
+        ('Spice', 'Spice Level'),
+        ('Dietary', 'Dietary Preference'),
+        ('Protein', 'Protein Choice'),
         ('Other', 'Other'),
     ]
     custom_option_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
@@ -101,6 +102,10 @@ class CustomizationOption(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     
+    def clean(self):
+        if self.price < 0:
+            raise ValidationError("Price must be non-negative.")
+
     def __str__(self):
         return self.name
 

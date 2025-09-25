@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  backend:
+    name: Django backend checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r weekend-chef-backend/requirements.txt
+      - name: Django system check
+        working-directory: weekend-chef-backend
+        run: python manage.py check
+
+  flutter-apps:
+    name: Flutter analyze & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Weekend Chef Client
+        working-directory: weekend-chef-client
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+      - name: Weekend Chef Dispatcher
+        working-directory: weekend-chef-dispatch
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+      - name: Weekend Chef Cook
+        working-directory: weekend_chef
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+  admin-web:
+    name: Admin web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        working-directory: weekend_chef_admin
+        run: npm ci
+      - name: Build
+        working-directory: weekend_chef_admin
+        run: npm run build

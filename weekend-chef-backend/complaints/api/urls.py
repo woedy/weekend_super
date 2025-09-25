@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from clients.api.views import add_client, get_all_clients_view, get_client_details_view, edit_client, archive_client, \
     get_all_archived_clients_view, unarchive_client, delete_client, add_client_complaint, edit_client_complaint, \
@@ -6,7 +6,7 @@ from clients.api.views import add_client, get_all_clients_view, get_client_detai
     unarchive_client_complaint, delete_client_complaint, get_all_archived_client_complaints_view, \
     change_complaint_status
 
-app_name = 'clients'
+app_name = 'complaints'
 
 urlpatterns = [
     path('add-client/', add_client, name="add_client"),
@@ -28,5 +28,6 @@ urlpatterns = [
     path('get-all-archived-client-complaints/', get_all_archived_client_complaints_view, name="get_all_archived_client_complaints_view"),
 
     path('change-complaint-status/', change_complaint_status, name="change_complaint_status"),
+    path('v2/', include(('complaints.api.v2.urls', 'v2'), namespace='v2')),
 
 ]

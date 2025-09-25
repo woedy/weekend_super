@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from weekend_chef_project.utils import unique_user_id_generator
@@ -132,6 +133,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_online = models.BooleanField(default=True)
     email_verified = models.BooleanField(default=False)
+    phone_verified = models.BooleanField(default=False)
 
 
     is_archived = models.BooleanField(default=False)
@@ -190,6 +192,41 @@ pre_save.connect(pre_save_user_id_receiver, sender=User)
 
 
 
+
+
+class VerificationToken(models.Model):
+    class Purpose(models.TextChoices):
+        EMAIL = "email", "Email verification"
+        PHONE = "phone", "Phone verification"
+        PASSWORD_RESET = "password_reset", "Password reset"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verification_tokens")
+    purpose = models.CharField(max_length=32, choices=Purpose.choices)
+    code = models.CharField(max_length=8)
+    destination = models.CharField(max_length=255, blank=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "purpose", "code"], name="verification_lookup"),
+        ]
+
+    def mark_consumed(self):
+        self.consumed_at = timezone.now()
+        self.save(update_fields=["consumed_at"])
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    @property
+    def is_consumed(self):
+        return self.consumed_at is not None
+
+    def __str__(self):
+        return f"{self.user.email} - {self.purpose}"
 
 
 class UserContact(AbstractBaseUser):

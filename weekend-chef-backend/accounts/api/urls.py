@@ -5,10 +5,18 @@ from accounts.api.chef_views import ChefLogin, register_chef, resend_chef_email_
 from accounts.api.client_views import register_client, verify_client_email, resend_client_email_verification, ClientLogin
 from accounts.api.dispatch_views import DispatchDriverLogin, register_dispatch, verify_dispatch_email
 from accounts.api.password_views import PasswordResetView, confirm_otp_password_view, new_password_reset_view, resend_password_otp
+from accounts.api.v2 import views as v2_views
 
 app_name = 'accounts'
 
 urlpatterns = [
+    path('v2/register/', v2_views.RegistrationView.as_view(), name="register"),
+    path('v2/login/', v2_views.LoginView.as_view(), name="login"),
+    path('v2/profile/', v2_views.ProfileView.as_view(), name="profile"),
+    path('v2/request-verification/', v2_views.VerificationRequestView.as_view(), name="request_verification"),
+    path('v2/verify/', v2_views.VerificationView.as_view(), name="verify"),
+    path('v2/resend-phone/', v2_views.ResendPhoneVerificationView.as_view(), name="resend_phone_verification"),
+
     path('register-weekend-chef-admin/', register_weekend_chef_admin, name="register_weekend_chef_admin"),
     path('login-admin/', AdminLogin.as_view(), name="login_admin"),
     path('verify-admin-email/', verify_chef_email, name="verify_admin_email"),

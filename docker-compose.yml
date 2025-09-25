@@ -1,0 +1,120 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: weekend_chef
+      POSTGRES_USER: weekend_chef
+      POSTGRES_PASSWORD: weekend_chef
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weekend_chef"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./weekend-chef-backend
+    env_file:
+      - .env
+    environment:
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: weekend_chef
+      DJANGO_DB_USER: weekend_chef
+      DJANGO_DB_PASSWORD: weekend_chef
+      DJANGO_DB_HOST: db
+      DJANGO_DB_PORT: 5432
+      DJANGO_ALLOWED_HOSTS: localhost,backend
+      RUN_MIGRATIONS: "1"
+      COLLECT_STATIC: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      - staticfiles:/app/static_cdn
+      - mediafiles:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery_worker:
+    build: ./weekend-chef-backend
+    env_file:
+      - .env
+    environment:
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: weekend_chef
+      DJANGO_DB_USER: weekend_chef
+      DJANGO_DB_PASSWORD: weekend_chef
+      DJANGO_DB_HOST: db
+      DJANGO_DB_PORT: 5432
+    command: ["celery", "-A", "weekend_chef_project", "worker", "-l", "info"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  celery_beat:
+    build: ./weekend-chef-backend
+    env_file:
+      - .env
+    environment:
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: weekend_chef
+      DJANGO_DB_USER: weekend_chef
+      DJANGO_DB_PASSWORD: weekend_chef
+      DJANGO_DB_HOST: db
+      DJANGO_DB_PORT: 5432
+    command: ["celery", "-A", "weekend_chef_project", "beat", "-l", "info"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  channel_worker:
+    build: ./weekend-chef-backend
+    env_file:
+      - .env
+    environment:
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: weekend_chef
+      DJANGO_DB_USER: weekend_chef
+      DJANGO_DB_PASSWORD: weekend_chef
+      DJANGO_DB_HOST: db
+      DJANGO_DB_PORT: 5432
+    command: ["python", "manage.py", "runworker", "default"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: ./weekend_chef_admin
+    ports:
+      - "4173:80"
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  staticfiles:
+  mediafiles:

@@ -1,9 +1,15 @@
 import os
 import random
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_save, pre_save
+from django.utils import timezone
+
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
 
 from food.models import Dish
 from weekend_chef_project.utils import unique_chef_id_generator
@@ -66,6 +72,11 @@ CHEF_AVAILABILITY = [
 
 
 class ChefProfile(models.Model):
+    class ReviewStatus(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     chef_id = models.CharField(max_length=200, null=True, blank=True)
 
@@ -93,8 +104,16 @@ class ChefProfile(models.Model):
     average_rating = models.FloatField(default=0)
 
     active = models.BooleanField(default=False)
+    review_status = models.CharField(max_length=20, choices=ReviewStatus.choices, default=ReviewStatus.PENDING)
+    review_notes = models.TextField(blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.review_status != self.ReviewStatus.PENDING and self.reviewed_at is None:
+            self.reviewed_at = timezone.now()
+        super().save(*args, **kwargs)
 
 
 
@@ -125,8 +144,60 @@ class ChefDish(models.Model):
     is_archived = models.BooleanField(default=False)
 
     active = models.BooleanField(default=False)
+    grocery_budget_estimate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    menu_version = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+    def clean(self):
+        price_fields = [self.small_price, self.medium_price, self.large_price]
+        for price in price_fields:
+            if price is not None and price < 0:
+                raise ValidationError("Price values must be positive.")
+
+    def compute_grocery_estimate(self) -> Decimal:
+        ingredients = self.dish.ingredients.all()
+        return sum((ingredient.price for ingredient in ingredients), Decimal("0"))
+
+    def snapshot(self):
+        return {
+            "small_price": str(self.small_price or "0"),
+            "medium_price": str(self.medium_price or "0"),
+            "large_price": str(self.large_price or "0"),
+            "grocery_budget_estimate": str(self.grocery_budget_estimate),
+            "active": self.active,
+        }
+
+    def save(self, *args, **kwargs):
+        creating = self.pk is None
+        create_snapshot = creating
+        if not creating:
+            previous = ChefDish.objects.get(pk=self.pk)
+            if any([
+                previous.small_price != self.small_price,
+                previous.medium_price != self.medium_price,
+                previous.large_price != self.large_price,
+                previous.active != self.active,
+            ]):
+                self.menu_version = previous.menu_version + 1
+                create_snapshot = True
+        self.grocery_budget_estimate = self.compute_grocery_estimate()
+        self.full_clean()
+        super().save(*args, **kwargs)
+        if create_snapshot:
+            MenuItemVersion.objects.create(menu_item=self, version=self.menu_version, snapshot=self.snapshot())
+
+
+class MenuItemVersion(models.Model):
+    menu_item = models.ForeignKey(ChefDish, related_name="versions", on_delete=models.CASCADE)
+    version = models.PositiveIntegerField()
+    snapshot = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("menu_item", "version")
+        ordering = ["-created_at"]
 
 
 
@@ -166,6 +237,30 @@ class ChefGallery(models.Model):
     chef = models.ForeignKey(ChefProfile, on_delete=models.CASCADE)
     description = models.TextField()
     photo = models.ImageField(upload_to='chef/gallery/', null=True, blank=True)
+
+
+def chef_document_upload(instance, filename):
+    ext = filename.split('.')[-1]
+    return f"chef/documents/{instance.profile.chef_id or instance.profile.id}/{uuid.uuid4()}.{ext}"
+
+
+class ChefDocument(models.Model):
+    class DocumentType(models.TextChoices):
+        IDENTITY = "identity", "Identity"
+        CERTIFICATION = "certification", "Certification"
+        KITCHEN = "kitchen", "Kitchen"
+
+    profile = models.ForeignKey(ChefProfile, on_delete=models.CASCADE, related_name="documents")
+    document_type = models.CharField(max_length=32, choices=DocumentType.choices)
+    file = models.FileField(upload_to=chef_document_upload)
+    description = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+
+    def __str__(self):
+        return f"{self.profile.user.email} - {self.document_type}"
 
 
 

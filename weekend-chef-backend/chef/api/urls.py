@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from clients.api.views import add_client, get_all_clients_view, get_client_details_view, edit_client, archive_client, \
     get_all_archived_clients_view, unarchive_client, delete_client, add_client_complaint, edit_client_complaint, \
@@ -10,4 +10,5 @@ app_name = 'chef'
 
 urlpatterns = [
     path('add-client/', add_client, name="add_client"),
+    path('v2/', include(('chef.api.v2.urls', 'v2'), namespace='v2')),
 ]

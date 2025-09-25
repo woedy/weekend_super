@@ -27,6 +27,9 @@ urlpatterns = [
         path('api/orders/', include('orders.api.urls', 'orders_api')),
         path('api/homepage/', include('homepage.api.urls', 'homepage_api')),
         path('api/clients/', include('clients.api.urls', 'clients_api')),
+        path('api/complaints/', include('complaints.api.urls', 'complaints_api')),
+        path('api/chef/', include('chef.api.urls', 'chef_api')),
+        path('api/notifications/', include('notifications.api.urls', 'notifications_api')),
 
 ]
 

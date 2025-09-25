@@ -1,0 +1,17 @@
+asgiref
+Django
+celery
+channels-redis
+cryptography
+# Domain dependencies
+daphne
+django-cors-headers
+djangorestframework
+djangorestframework-simplejwt
+Pillow
+psycopg2-binary
+pyfcm
+pytz
+redis
+requests
+sqlparse

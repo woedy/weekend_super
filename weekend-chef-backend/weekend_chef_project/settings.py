@@ -13,6 +13,26 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 import os
 from pathlib import Path
+from django.core.management.utils import get_random_secret_key
+
+
+def env(key: str, default: str | None = None) -> str | None:
+    """Fetch a string environment variable with an optional default."""
+    return os.environ.get(key, default)
+
+
+def env_bool(key: str, default: bool = False) -> bool:
+    """Return a boolean environment variable, interpreting common truthy strings."""
+    value = os.environ.get(key)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(key: str, default: str = "") -> list[str]:
+    """Return a list from a comma separated environment variable."""
+    raw = os.environ.get(key, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,23 +42,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&xk2-+17q3xlnh_cax&u2p&ha38hrr6e1st@mstvp!l&dzol$j'
+SECRET_KEY = env("DJANGO_SECRET_KEY") or get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool("DJANGO_DEBUG", False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'etornamasamoah@gmail.com'
-EMAIL_HOST_PASSWORD = 'nygmdsnhaxxlrsem'
-#EMAIL_PORT = 587
-#EMAIL_USE_TLS = True
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-DEFAULT_FROM_EMAIL = 'Weekend Chef <weekendchef@gmail.com>'
-BASE_URL = '0.0.0.0:80'
+EMAIL_BACKEND = env(
+    "DJANGO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_HOST = env("DJANGO_EMAIL_HOST", "smtp.gmail.com")
+EMAIL_HOST_USER = env("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env("DJANGO_EMAIL_HOST_PASSWORD", "")
+EMAIL_PORT = int(env("DJANGO_EMAIL_PORT", "465"))
+EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", False)
+EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", True)
+DEFAULT_FROM_EMAIL = env(
+    "DJANGO_DEFAULT_FROM_EMAIL", "Weekend Chef <no-reply@weekendchef.local>"
+)
+BASE_URL = env("DJANGO_BASE_URL", "http://localhost:8000")
 
 # Application definition
 
@@ -114,29 +137,34 @@ ASGI_APPLICATION = "weekend_chef_project.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+default_db_engine = env(
+    "DJANGO_DB_ENGINE",
+    "django.db.backends.sqlite3",
+)
+
+if default_db_engine == "django.db.backends.sqlite3":
+    DATABASES = {
+        "default": {
+            "ENGINE": default_db_engine,
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
-
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'weekend_chef_postgres',
-#         'USER': 'weekend_chef_postgres',
-#         'PASSWORD': 'weekend_chef_postgres',
-#         'HOST': 'db',
-#         'PORT': 5432,
-#     }
-# }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": default_db_engine,
+            "NAME": env("DJANGO_DB_NAME", "weekend_chef"),
+            "USER": env("DJANGO_DB_USER", "weekend_chef"),
+            "PASSWORD": env("DJANGO_DB_PASSWORD", ""),
+            "HOST": env("DJANGO_DB_HOST", "localhost"),
+            "PORT": int(env("DJANGO_DB_PORT", "5432")),
+        }
+    }
 
 
 
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", "redis://redis:6379")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", "redis://redis:6379")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -177,7 +205,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn", "static_root")  # For static 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # Separate media files
 
-HOST_SCHEME = "http://"
+HOST_SCHEME = env("DJANGO_HOST_SCHEME", "http://")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -185,7 +213,7 @@ HOST_SCHEME = "http://"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-FCM_SERVER_KEY = 'AAAAxOQuav4:APA91bGO5BfxGqVOvfop7ZyrFW1RePVALmhotBv4VMk67KD_IP_9aJfLnBVYQmoJpJw3ho2sKBELLcnMRFhHRl-Ri312kySP7eOLcYJgI0XmyrNZ9CR9fu28bnZn7u5W53dV8Q-4W6oU'
+FCM_SERVER_KEY = env("FCM_SERVER_KEY", "")
 
 
 from celery import Celery
@@ -206,6 +234,7 @@ CHANNEL_LAYERS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # Add other authentication classes as needed
     ),
@@ -222,32 +251,41 @@ SIMPLE_JWT = {
 
 
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOW_ALL_ORIGINS = env_bool("DJANGO_CORS_ALLOW_ALL_ORIGINS", False)
+CORS_ALLOWED_ORIGINS = env_list("DJANGO_CORS_ALLOWED_ORIGINS")
 
-CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = []
-
-
-
-PUSHER_APP_ID = '1875922'
-PUSHER_KEY = '88ff191e00149bfda666'
-PUSHER_SECRET = '3cb983d4c5b0ff21cb0f'
-PUSHER_CLUSTER = 'mt1'
-PUSHER_SSL = True
+CORS_ALLOW_CREDENTIALS = env_bool("DJANGO_CORS_ALLOW_CREDENTIALS", True)
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 
-#PAYSTACK_SECRET_KEY = 'sk_test_6ff0bf30279f1acafb4ac3e565a0bba4f56c940e'
-#MNOTIFY_KEY = 'MsxG8Cc6cjRqjJzEZTtjlHBYb'
-#MNOTIFY_SENDER_ID = 'BookedNise'
+
+PUSHER_APP_ID = env("PUSHER_APP_ID", "")
+PUSHER_KEY = env("PUSHER_KEY", "")
+PUSHER_SECRET = env("PUSHER_SECRET", "")
+PUSHER_CLUSTER = env("PUSHER_CLUSTER", "")
+PUSHER_SSL = env_bool("PUSHER_SSL", True)
 
 
-GOOGLE_API_KEY = 'AIzaSyCAw7IbX2OgFTlcOiEZ5kTWMPQJ1JeC7mI'
+PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY", "")
+MNOTIFY_KEY = env("MNOTIFY_KEY", "")
+MNOTIFY_SENDER_ID = env("MNOTIFY_SENDER_ID", "")
+
+
+GOOGLE_API_KEY = env("GOOGLE_API_KEY", "")
 
 
 # MinIO Configuration
-MINIO_ENDPOINT = "your-minio-endpoint"  # e.g., 'play.min.io'
-MINIO_ACCESS_KEY = "your-access-key"
-MINIO_SECRET_KEY = "your-secret-key"
-MINIO_BUCKET_NAME = "your-bucket-name"
-MINIO_USE_SSL = False  # Set to True if your MinIO is set up with SSL (HTTPS)
+MINIO_ENDPOINT = env("MINIO_ENDPOINT", "")  # e.g., 'play.min.io'
+MINIO_ACCESS_KEY = env("MINIO_ACCESS_KEY", "")
+MINIO_SECRET_KEY = env("MINIO_SECRET_KEY", "")
+MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "")
+MINIO_USE_SSL = env_bool("MINIO_USE_SSL", False)  # Set to True if your MinIO is set up with SSL (HTTPS)
+
+
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", False)
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", False)
+CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", False)
+SECURE_HSTS_SECONDS = int(env("DJANGO_SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", False)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

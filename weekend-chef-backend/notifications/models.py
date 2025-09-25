@@ -19,3 +19,12 @@ class Notification(models.Model):
 
 
 
+class NotificationPreference(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="notification_preferences")
+    email_updates = models.BooleanField(default=True)
+    push_updates = models.BooleanField(default=True)
+    sms_updates = models.BooleanField(default=False)
+    order_status_updates = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Preferences for {self.user.email}"
