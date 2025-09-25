@@ -124,7 +124,7 @@ This checklist consolidates the core work needed to take the Weekend Chef multi-
 
 ## 6. Admin Console (Vite/React)
 
-- [ ] **ADM-1 User & cook verification dashboard**  
+- [x] **ADM-1 User & cook verification dashboard**
   * User stories: US-ADMIN-1 identity checks, US-ADMIN-2 commission config.  
   * Acceptance:  
     - AC-18.1 Queue displaying pending cook applications with documents.  

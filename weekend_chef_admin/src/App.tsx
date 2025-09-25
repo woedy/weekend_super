@@ -25,6 +25,7 @@ import ArchivedCustomOptions from './pages/Food/CustomOptions/ArchivedCustomOpti
 import CustomOptionDetails from './pages/Food/CustomOptions/CustomOptionDetails';
 import IngredientDetails from './pages/Food/Ingredients/IngredientDetails';
 import MapView from './pages/Food/Dish/MapView';
+import VerificationDashboard from './pages/Admin/VerificationDashboard';
 
 const hiddenOnRoutes = ['/', '/signup', '/signin'];
 
@@ -91,6 +92,16 @@ function App() {
             <>
               <PageTitle title="All Dish Categories | Weekend Chef Admin." />
               <AllDishCategories />
+            </>
+          }
+        />
+
+        <Route
+          path="/verification"
+          element={
+            <>
+              <PageTitle title="Cook Verification | Weekend Chef Admin." />
+              <VerificationDashboard />
             </>
           }
         />
