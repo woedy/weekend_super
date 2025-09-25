@@ -50,6 +50,7 @@ dependencies:
   location: 7.0.1
   pusher_channels_flutter: 2.2.1
   flutter_paystack: 1.0.7
+  sentry_flutter: 7.18.0
 
 
   

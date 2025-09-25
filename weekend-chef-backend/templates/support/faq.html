@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weekend Chef Support FAQ</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f6f7fb;
+            color: #1f2933;
+        }
+        header {
+            background: linear-gradient(135deg, #0f766e, #34d399);
+            color: #fff;
+            padding: 48px 16px;
+            text-align: center;
+        }
+        header h1 {
+            margin-bottom: 8px;
+        }
+        main {
+            max-width: 960px;
+            margin: -40px auto 80px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(15, 118, 110, 0.15);
+            padding: 32px;
+        }
+        section + section {
+            margin-top: 40px;
+        }
+        h2 {
+            color: #0f766e;
+            margin-bottom: 12px;
+        }
+        h3 {
+            margin-top: 24px;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        .contact-card {
+            margin-top: 48px;
+            padding: 24px;
+            border-radius: 16px;
+            background: #ecfdf5;
+            border: 1px solid #d1fae5;
+        }
+        .contact-card h2 {
+            margin-top: 0;
+            color: #047857;
+        }
+        .contact-card p {
+            margin: 8px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: #6b7280;
+        }
+        @media (max-width: 640px) {
+            main {
+                margin: -24px 16px 40px;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Weekend Chef Help Centre</h1>
+    <p>Guidance for clients, cooks, and dispatchers to deliver safe, delightful meal experiences.</p>
+</header>
+<main>
+    <section>
+        <h2>Client FAQs</h2>
+        <h3>How do I prepare my kitchen before a cook arrives?</h3>
+        <p>Clear counter space, wash any equipment you have agreed to provide, and keep ingredients refrigerated until the cook requests them. Please ensure pets are away from the preparation area and that a sink with soap is available.</p>
+        <h3>What packaging should I have on hand?</h3>
+        <p>We recommend reusable glass or BPA-free plastic containers in a variety of sizes. Label them if certain dishes should be kept separate or if family members have dietary preferences.</p>
+        <h3>How do I report an issue with my delivery?</h3>
+        <p>Open the order in the app and tap <strong>Report an issue</strong>. You can upload photos within two hours of delivery. Our operations team will follow up within 15 minutes for urgent food safety concerns.</p>
+    </section>
+
+    <section>
+        <h2>Cook FAQs</h2>
+        <h3>What are the non-negotiable food safety steps?</h3>
+        <p>Wash hands for at least 20 seconds before starting, sanitise prep surfaces, and use colour-coded cutting boards when available. Cook proteins to recommended temperatures and document any substitutions in the order chat.</p>
+        <h3>How should I package meals for transport?</h3>
+        <p>Use vented containers for fried or crispy items, and label all dishes with reheating guidance. Allow dishes to cool slightly before sealing to prevent condensation that can cause sogginess.</p>
+        <h3>Who do I contact if I am running behind?</h3>
+        <p>Update the order chat with an estimated delay and call the operations hotline at <strong>+234 800 000 0000</strong>. Early notice helps dispatchers adjust pickup windows.</p>
+    </section>
+
+    <section>
+        <h2>Dispatcher FAQs</h2>
+        <h3>How do I keep meals at the right temperature?</h3>
+        <p>Pre-condition insulated bags, separate hot and cold items, and log temperatures for journeys longer than 30 minutes. Request replacement packaging immediately if seals are broken.</p>
+        <h3>What should I say at the door?</h3>
+        <p>Introduce yourself as Weekend Chef dispatch, confirm the order name, and share any reheating notes provided by the cook. Encourage clients to refrigerate perishables within two hours.</p>
+        <h3>Where do I escalate delivery incidents?</h3>
+        <p>Log incidents at <a href="mailto:ops@weekendchef.app">ops@weekendchef.app</a> or through the dispatcher WhatsApp line at <strong>+234 800 000 1111</strong>. Use the "Delivery issue" tag so the shift lead can triage immediately.</p>
+    </section>
+
+    <section class="contact-card">
+        <h2>Still need help?</h2>
+        <p>Email: <a href="mailto:support@weekendchef.app">support@weekendchef.app</a></p>
+        <p>Phone: +234 800 000 0000 (6am – 10pm daily)</p>
+        <p>Safety certifications: <a href="mailto:safety@weekendchef.app">safety@weekendchef.app</a></p>
+        <p>Dispatcher hotline: +234 800 000 1111 (6am – midnight)</p>
+    </section>
+</main>
+<footer>
+    &copy; {{ current_year|default:2024 }} Weekend Chef. Built for our partners and diners.
+</footer>
+</body>
+</html>

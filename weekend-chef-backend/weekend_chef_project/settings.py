@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from datetime import timedelta
+import logging
 import os
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
@@ -98,6 +99,8 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
+
+QA_SMOKE_ENABLED = env_bool("QA_SMOKE_ENABLED", DEBUG)
 
 
 MIDDLEWARE = [
@@ -211,6 +214,30 @@ HOST_SCHEME = env("DJANGO_HOST_SCHEME", "http://")
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SENTRY_DSN = env("SENTRY_DSN", "") or ""
+SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT", "development")
+SENTRY_TRACES_SAMPLE_RATE = float(env("SENTRY_TRACES_SAMPLE_RATE", "0.05"))
+
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    sentry_logging = LoggingIntegration(level=logging.INFO, event_level=logging.ERROR)
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment=SENTRY_ENVIRONMENT,
+        integrations=[
+            DjangoIntegration(transaction_style="url"),
+            CeleryIntegration(),
+            sentry_logging,
+        ],
+        traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+        send_default_pii=True,
+    )
 
 
 FCM_SERVER_KEY = env("FCM_SERVER_KEY", "")

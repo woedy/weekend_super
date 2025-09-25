@@ -4,6 +4,7 @@ import '../../constants.dart';
 import '../../core/app_state.dart';
 import '../../core/models/cook_profile.dart';
 import '../../core/utils/date_formatters.dart';
+import '../support/cook_tutorial_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key, required this.onEditVerification});
@@ -30,6 +31,22 @@ class ProfileScreen extends StatelessWidget {
           _AvailabilityCard(onAddSlot: () => _addAvailability(context, state)),
           const SizedBox(height: 16),
           _SpecialtiesCard(onEdit: () => _editSpecialties(context, state)),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.school_outlined),
+              title: const Text('Training & tutorials'),
+              subtitle: const Text('Refresh food safety, packaging, and delivery best practices.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const CookTutorialScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 16),
           Card(
             child: Padding(

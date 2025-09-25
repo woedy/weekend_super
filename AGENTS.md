@@ -130,7 +130,7 @@ This checklist consolidates the core work needed to take the Weekend Chef multi-
     - AC-18.1 Queue displaying pending cook applications with documents.  
     - AC-18.2 Ability to approve/flag accounts and set commission tiers.  
     - AC-18.3 Audit log for admin actions.
-- [ ] **ADM-2 Operations monitoring**  
+- [x] **ADM-2 Operations monitoring**
   * User stories: US-ADMIN-3 disputes, US-ADMIN-4 promotions.  
   * Acceptance:  
     - AC-19.1 Live dashboard of active orders, payouts, disputes.  
@@ -139,18 +139,18 @@ This checklist consolidates the core work needed to take the Weekend Chef multi-
 
 ## 7. Communications & Support
 
-- [ ] **COM-1 Unified messaging system**  
+- [x] **COM-1 Unified messaging system**
   * Acceptance:  
     - AC-20.1 Secure chat threads per order across client/cook/dispatcher, with push notifications.  
     - AC-20.2 Templates for common updates ("running late", "ingredients substitute needed").
-- [ ] **COM-2 Knowledge base & onboarding content**  
+- [x] **COM-2 Knowledge base & onboarding content**
   * Acceptance:  
     - AC-21.1 In-app tutorials for all roles covering food safety, packaging, delivery etiquette.  
     - AC-21.2 Public FAQ and support contact pathways.
 
 ## 8. Quality Assurance & Compliance
 
-- [ ] **QA-1 Automated testing & monitoring**  
+- [x] **QA-1 Automated testing & monitoring**
   * Acceptance:  
     - AC-22.1 Backend unit/integration tests for critical flows (auth, orders, payouts).  
     - AC-22.2 Flutter widget/integration tests for high-traffic screens.  

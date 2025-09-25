@@ -78,4 +78,10 @@ Use `docker compose logs celery_worker` to monitor worker activity.
 - If migrations fail because Postgres is still starting, rerun `docker compose up` after verifying the database logs.
 - Use `docker compose logs -f <service>` for real-time diagnostics.
 
+## 9. Automated QA smoke tests
+
+- End-to-end order lifecycle checks live in `ops/e2e` and rely on the Django QA smoke endpoint enabled via `QA_SMOKE_ENABLED`.
+- Start the backend locally (`docker compose up backend`) and run `npm --prefix ops/e2e run test:e2e` to execute the Cypress suite.
+- Configure `BACKEND_BASE_URL` to point to a staging deployment when running the tests against remote environments.
+
 This document, together with `AGENTS.md`, forms the operational playbook for delivering Weekend Chef in investor demos and production pilots.

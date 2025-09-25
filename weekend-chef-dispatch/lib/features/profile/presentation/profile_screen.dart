@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/dispatcher_profile.dart';
+import '../../support/presentation/dispatcher_tutorial_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key, required this.dispatcher});
@@ -59,6 +60,22 @@ class ProfileScreen extends StatelessWidget {
                   subtitle: const Text('You can toggle availability when you need a break.'),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.school_outlined),
+              title: const Text('Training hub'),
+              subtitle: const Text('Tutorials on food safety, packaging, and delivery etiquette.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const DispatcherTutorialScreen(),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 16),

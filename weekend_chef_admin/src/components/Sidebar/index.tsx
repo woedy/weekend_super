@@ -193,6 +193,37 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </NavLink>
               </li>
 
+              <li>
+                <NavLink
+                  to="/operations"
+                  className={({ isActive }) =>
+                    `group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium ${
+                      isActive
+                        ? 'bg-yellow text-black dark:bg-meta-4 dark:text-white'
+                        : 'text-bodydark1 hover:bg-yellow hover:text-black dark:hover:bg-white'
+                    } duration-300 ease-in-out`
+                  }
+                >
+                  <svg
+                    className="fill-current"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3 3h18M5 8.5h14M3 21h18M5 13l3.5-3.5L12 13l4-4 3 3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Operations
+                </NavLink>
+              </li>
+
               {/* <!-- Menu Item Dashboard --> */}
 
               {/* <!-- Menu Item Forms --> */}

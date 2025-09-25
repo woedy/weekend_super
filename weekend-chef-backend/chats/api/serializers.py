@@ -1,76 +1,78 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
-from chats.models import PrivateRoomChatMessage, PrivateChatRoom
-from shop.models import Shop
-from user_profile.models import UserProfile
+from chats.models import MessageTemplate, OrderChatThread, OrderMessage, ThreadParticipant
+
 
 User = get_user_model()
 
-class UserPersonalInfoRoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = [
-            'photo',
-            'phone',
-        ]
 
-class UserRoomSerializer(serializers.ModelSerializer):
-    personal_info = UserPersonalInfoRoomSerializer(many=False)
+class UserSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'user_id',
-            'email',
-            'full_name',
-            'personal_info'
-        ]
+        fields = ["user_id", "first_name", "last_name", "email", "user_type", "photo"]
 
-class ShopRoomSerializer(serializers.ModelSerializer):
+
+class ThreadParticipantSerializer(serializers.ModelSerializer):
+    user = UserSummarySerializer(read_only=True)
 
     class Meta:
-        model = Shop
-        fields = [
-            'shop_id',
-            'shop_name',
-            'photo'
-        ]
+        model = ThreadParticipant
+        fields = ["id", "role", "is_active", "joined_at", "updated_at", "user"]
 
-class ShopUserRoomSerializer(serializers.ModelSerializer):
-    shop_user = ShopRoomSerializer(many=False)
+
+class MessageTemplateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = [
-            'user_id',
-            'email',
-            'full_name',
-            'shop_user'
-        ]
+        model = MessageTemplate
+        fields = ["id", "key", "label", "body", "audience"]
 
 
-class PrivateRoomSerializer(serializers.ModelSerializer):
-    shop = ShopUserRoomSerializer(many=False)
-    client = UserRoomSerializer(many=False)
+class OrderMessageSerializer(serializers.ModelSerializer):
+    sender = UserSummarySerializer(read_only=True)
+    template = MessageTemplateSerializer(read_only=True)
 
     class Meta:
-        model = PrivateChatRoom
-        fields = [
-            'room_id',
-            'shop',
-            'client',
-        ]
+        model = OrderMessage
+        fields = ["id", "body", "created_at", "metadata", "sender", "template"]
 
-class PrivateRoomChatMessageSerializer(serializers.ModelSerializer):
-    room = PrivateRoomSerializer(many=False)
-    sender = serializers.SerializerMethodField()
+
+class CreateOrderMessageSerializer(serializers.ModelSerializer):
+    template_key = serializers.SlugField(required=False, allow_null=True)
 
     class Meta:
-        model = PrivateRoomChatMessage
-        fields = ['id','room', 'message', 'timestamp', 'read', 'sender' ]
+        model = OrderMessage
+        fields = ["body", "template_key", "metadata"]
 
-    def get_sender(self, obj):
-        sender_id = obj.user.user_id
-        return sender_id
+    def validate(self, attrs):
+        template_key = attrs.pop("template_key", None)
+        if template_key:
+            try:
+                template = MessageTemplate.objects.get(key=template_key)
+            except MessageTemplate.DoesNotExist as exc:
+                raise serializers.ValidationError({"template_key": "Unknown template."}) from exc
+            attrs["template"] = template
+        return attrs
 
 
+class OrderChatThreadSerializer(serializers.ModelSerializer):
+    participants = serializers.SerializerMethodField()
+    last_message = serializers.SerializerMethodField()
+    order_reference = serializers.SerializerMethodField()
 
+    class Meta:
+        model = OrderChatThread
+        fields = ["id", "order", "order_reference", "participants", "created_at", "updated_at", "last_message"]
+        read_only_fields = ["id", "order", "created_at", "updated_at", "last_message", "order_reference"]
+
+    def get_last_message(self, obj):
+        message = obj.messages.select_related("sender", "template").order_by("-created_at").first()
+        if not message:
+            return None
+        return OrderMessageSerializer(message).data
+
+    def get_order_reference(self, obj):
+        return obj.order.order_id or str(obj.order.pk)
+
+    def get_participants(self, obj):
+        participants = obj.thread_participants.select_related("user").order_by("joined_at")
+        return ThreadParticipantSerializer(participants, many=True).data

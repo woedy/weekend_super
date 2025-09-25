@@ -4,6 +4,7 @@ import '../../../constants.dart';
 import '../../../localization/localization_extension.dart';
 import '../../authentication/domain/auth_state.dart';
 import '../../authentication/presentation/controllers/auth_controller.dart';
+import '../../support/presentation/client_knowledge_base_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key, required this.authController});
@@ -63,6 +64,22 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 32),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.school_outlined),
+                title: Text(l10n.translate('learnSupport')),
+                subtitle: Text(l10n.translate('learnSupportSubtitle')),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ClientKnowledgeBaseScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: authController.signOut,
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
