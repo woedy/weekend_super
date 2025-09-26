@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from chats.models import PrivateChatRoom
 from chef.models import ChefProfile
-from clients.models import Client, ClientHomeLocation
+from clients.models import Allergy, Client, ClientHomeLocation
 from dispatch.models import DispatchDriver
 from food.models import CustomizationOption, Dish, DishIngredient
 from weekend_chef_project.utils import unique_order_id_generator
@@ -119,6 +119,25 @@ def pre_save_order_id_receiver(sender, instance, *args, **kwargs):
 
 
 pre_save.connect(pre_save_order_id_receiver, sender=Order)
+
+
+class OrderAllergenReport(models.Model):
+    order = models.OneToOneField(Order, related_name="allergen_report", on_delete=models.CASCADE)
+    allergies = models.ManyToManyField(Allergy, blank=True)
+    custom_allergy_notes = models.TextField(blank=True)
+    reported_by_client = models.BooleanField(default=False)
+    reported_at = models.DateTimeField(null=True, blank=True)
+    acknowledged_by_chef = models.BooleanField(default=False)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    acknowledgement_notes = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Order allergen report"
+        verbose_name_plural = "Order allergen reports"
+
+    def __str__(self):
+        reference = self.order.order_id or self.order.pk
+        return f"Allergen report for order {reference}"
 
 
 class OrderStatusTransition(models.Model):

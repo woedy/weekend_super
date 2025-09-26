@@ -85,3 +85,18 @@ Use `docker compose logs celery_worker` to monitor worker activity.
 - Configure `BACKEND_BASE_URL` to point to a staging deployment when running the tests against remote environments.
 
 This document, together with `AGENTS.md`, forms the operational playbook for delivering Weekend Chef in investor demos and production pilots.
+
+## 10. Investor demo environment
+
+Use the helper commands under `ops/demo` to spin up curated data for go-to-market walkthroughs:
+
+- `python manage.py seed_demo_data` creates investor-ready personas, menus, and orders.
+- `python manage.py reset_demo_data` clears those records.
+- `./ops/demo/refresh_demo.sh` combines both steps for back-to-back demos.
+
+See [`ops/demo/README.md`](demo/README.md) for the suggested narrative and account roster.
+
+## 11. Launch playbook
+
+Use the GTM rollout plan in [`ops/launch/README.md`](launch/README.md) when preparing a new market. It covers cook recruitment,
+client acquisition tactics, support escalation procedures, and the KPI dashboard cadence for the first month post-launch.

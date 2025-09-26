@@ -15,8 +15,22 @@ class NotificationPreferenceTests(APITestCase):
     def test_user_can_update_notification_preferences(self):
         response = self.client.get(self.url, **{"HTTP_AUTHORIZATION": f"Token {self.token.key}"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        payload = {"email_updates": False, "sms_updates": True}
+        self.assertIn("marketing_updates", response.data)
+        self.assertFalse(response.data["marketing_updates"])
+        initial_timestamp = response.data["consent_updated_at"]
+
+        payload = {
+            "email_updates": False,
+            "sms_updates": True,
+            "marketing_updates": True,
+            "consent_source": "mobile-app",
+            "consent_version": "2024-privacy",
+        }
         response = self.client.patch(self.url, payload, format="json", **{"HTTP_AUTHORIZATION": f"Token {self.token.key}"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.data["email_updates"])
         self.assertTrue(response.data["sms_updates"])
+        self.assertTrue(response.data["marketing_updates"])
+        self.assertEqual(response.data["consent_source"], "mobile-app")
+        self.assertEqual(response.data["consent_version"], "2024-privacy")
+        self.assertNotEqual(response.data["consent_updated_at"], initial_timestamp)

@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -6,15 +7,25 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.api.permissions import RolePermission
-from orders.api.v2.serializers import DeliveryProofSerializer, OrderRatingSerializer, OrderSerializer, OrderStatusSerializer
-from orders.models import DeliveryProof, Order
+from orders.api.v2.serializers import (
+    DeliveryProofSerializer,
+    OrderAllergenAcknowledgementSerializer,
+    OrderAllergenReportSerializer,
+    OrderAllergenSubmissionSerializer,
+    OrderRatingSerializer,
+    OrderSerializer,
+    OrderStatusSerializer,
+)
+from orders.models import DeliveryProof, Order, OrderAllergenReport
 
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated, RolePermission]
     required_roles = ["Client", "Chef", "Dispatch", "Admin"]
-    queryset = Order.objects.select_related("client__user", "chef__user").prefetch_related("escrow_entries", "status_transitions")
+    queryset = Order.objects.select_related("client__user", "chef__user").prefetch_related(
+        "escrow_entries", "status_transitions", "allergen_report__allergies"
+    )
 
     def get_permissions(self):
         if getattr(self, "action", None) in ["list", "retrieve"]:
@@ -72,3 +83,31 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         rating = serializer.save()
         return Response(OrderRatingSerializer(rating).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path="report-allergens", url_name="report-allergens")
+    def report_allergens(self, request, pk=None):
+        order = self.get_object()
+        client_relation = getattr(request.user, "clients", None)
+        if client_relation is None or client_relation.first() != order.client:
+            return Response({"detail": "Only the client who placed the order can submit allergens."}, status=status.HTTP_403_FORBIDDEN)
+        report, _ = OrderAllergenReport.objects.get_or_create(order=order)
+        serializer = OrderAllergenSubmissionSerializer(instance=report, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(OrderAllergenReportSerializer(report).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="acknowledge-allergens", url_name="acknowledge-allergens")
+    def acknowledge_allergens(self, request, pk=None):
+        order = self.get_object()
+        if request.user.user_type != "Chef" or getattr(request.user, "chefprofile", None) != order.chef:
+            return Response({"detail": "Only the assigned chef can acknowledge allergens."}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            report = order.allergen_report
+        except OrderAllergenReport.DoesNotExist:
+            return Response({"detail": "No allergen report has been submitted for this order."}, status=status.HTTP_400_BAD_REQUEST)
+        if not report.reported_by_client:
+            return Response({"detail": "Allergen report must be submitted by the client before acknowledgement."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = OrderAllergenAcknowledgementSerializer(instance=report, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(OrderAllergenReportSerializer(report).data, status=status.HTTP_200_OK)

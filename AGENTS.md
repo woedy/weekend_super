@@ -156,7 +156,7 @@ This checklist consolidates the core work needed to take the Weekend Chef multi-
     - AC-22.2 Flutter widget/integration tests for high-traffic screens.  
     - AC-22.3 End-to-end smoke tests (e.g., Cypress) covering full order lifecycle.  
     - AC-22.4 Error monitoring (Sentry or equivalent) integrated across apps.
-- [ ] **QA-2 Data privacy & food safety compliance**  
+- [x] **QA-2 Data privacy & food safety compliance**
   * Acceptance:  
     - AC-23.1 PII handling documented, with data retention policies.  
     - AC-23.2 Consent flows for messaging/notifications.  
@@ -164,15 +164,15 @@ This checklist consolidates the core work needed to take the Weekend Chef multi-
 
 ## 9. Go-To-Market Readiness
 
-- [ ] **GTM-1 Demo environment & sample data**  
+- [x] **GTM-1 Demo environment & sample data**
   * Acceptance:  
     - AC-24.1 Seed scripts generate realistic demo users, menus, and orders.  
     - AC-24.2 Demo walkthrough documentation/storyboard tailored for investors.  
     - AC-24.3 Reset scripts to refresh demo data quickly.
-- [ ] **GTM-2 Launch playbook**  
-  * Acceptance:  
-    - AC-25.1 Rollout plan for initial city/university, including cook recruitment and client acquisition steps.  
-    - AC-25.2 Support escalation matrix and on-call procedures.  
+- [x] **GTM-2 Launch playbook**
+  * Acceptance:
+    - AC-25.1 Rollout plan for initial city/university, including cook recruitment and client acquisition steps.
+    - AC-25.2 Support escalation matrix and on-call procedures.
     - AC-25.3 KPI dashboard for early traction monitoring.
 
 ---

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from orders.models import CustomizationValue, Order, OrderItem, OrderStatus
+from clients.models import Allergy
+from orders.models import CustomizationValue, Order, OrderAllergenReport, OrderItem, OrderStatus
 
 class CustomizationValueSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,12 +26,29 @@ class OrderStatusSerializer(serializers.ModelSerializer):
         model = OrderStatus
         fields = ['status', 'created_at']
 
+class OrderAllergenReportSerializer(serializers.ModelSerializer):
+    allergies = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+
+    class Meta:
+        model = OrderAllergenReport
+        fields = [
+            "reported_by_client",
+            "reported_at",
+            "acknowledged_by_chef",
+            "acknowledged_at",
+            "custom_allergy_notes",
+            "acknowledgement_notes",
+            "allergies",
+        ]
+
+
 class OrderSerializer(serializers.ModelSerializer):
     order_statuses = OrderStatusSerializer(many=True)  # Include the order status history
+    allergen_report = OrderAllergenReportSerializer(read_only=True)
 
     class Meta:
         model = Order
-        fields = ['order_id', 'client', 'total_price', 'order_date', 'order_time', 'order_statuses']
+        fields = ['order_id', 'client', 'total_price', 'order_date', 'order_time', 'order_statuses', 'allergen_report']
 
 
 

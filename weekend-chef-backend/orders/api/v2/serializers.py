@@ -2,11 +2,23 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils import timezone
 from rest_framework import serializers
 
 from chef.models import ChefProfile
-from orders.models import CartItem, DeliveryProof, EscrowLedgerEntry, Order, OrderRating, OrderStatusTransition
+from clients.models import Allergy
+from orders.models import (
+    CartItem,
+    DeliveryProof,
+    EscrowLedgerEntry,
+    Order,
+    OrderAllergenReport,
+    OrderRating,
+    OrderStatusTransition,
+)
 from orders.services import create_order_with_split, transition_order
 
 
@@ -34,11 +46,75 @@ class OrderStatusTransitionSerializer(serializers.ModelSerializer):
         fields = ["status", "changed_at", "notes"]
 
 
+class OrderAllergenReportSerializer(serializers.ModelSerializer):
+    allergies = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
+    allergy_labels = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderAllergenReport
+        fields = [
+            "reported_by_client",
+            "reported_at",
+            "acknowledged_by_chef",
+            "acknowledged_at",
+            "custom_allergy_notes",
+            "acknowledgement_notes",
+            "allergies",
+            "allergy_labels",
+        ]
+        read_only_fields = [
+            "reported_by_client",
+            "reported_at",
+            "acknowledged_by_chef",
+            "acknowledged_at",
+            "allergy_labels",
+        ]
+
+    def get_allergy_labels(self, obj):
+        return [allergy.name for allergy in obj.allergies.all()]
+
+
+class OrderAllergenSubmissionSerializer(serializers.ModelSerializer):
+    allergies = serializers.PrimaryKeyRelatedField(queryset=Allergy.objects.all(), many=True, required=False)
+
+    class Meta:
+        model = OrderAllergenReport
+        fields = ["allergies", "custom_allergy_notes"]
+
+    def update(self, instance, validated_data):
+        allergies = validated_data.pop("allergies", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.reported_by_client = True
+        instance.reported_at = timezone.now()
+        instance.acknowledged_by_chef = False
+        instance.acknowledged_at = None
+        instance.acknowledgement_notes = ""
+        instance.save()
+        if allergies is not None:
+            instance.allergies.set(allergies)
+        return instance
+
+
+class OrderAllergenAcknowledgementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderAllergenReport
+        fields = ["acknowledgement_notes"]
+
+    def update(self, instance, validated_data):
+        instance.acknowledgement_notes = validated_data.get("acknowledgement_notes", "")
+        instance.acknowledged_by_chef = True
+        instance.acknowledged_at = timezone.now()
+        instance.save(update_fields=["acknowledgement_notes", "acknowledged_by_chef", "acknowledged_at"])
+        return instance
+
+
 class OrderSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(source="cart.items", many=True, read_only=True)
     chef = serializers.PrimaryKeyRelatedField(queryset=ChefProfile.objects.all())
     escrow_entries = EscrowEntrySerializer(many=True, read_only=True)
     status_transitions = OrderStatusTransitionSerializer(many=True, read_only=True)
+    allergen_report = OrderAllergenReportSerializer(read_only=True)
 
     class Meta:
         model = Order
@@ -62,6 +138,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "items",
             "escrow_entries",
             "status_transitions",
+            "allergen_report",
             "created_at",
             "updated_at",
         ]
@@ -79,6 +156,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "items",
+            "allergen_report",
         ]
 
     def create(self, validated_data):

@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 
 from accounts.models import User
 from chef.models import ChefProfile
-from clients.models import Client
+from clients.models import Allergy, Client
 from dispatch.models import DispatchDriver
 from food.models import FoodCategory, Dish
 from orders.models import Cart, CartItem, Order
@@ -18,6 +18,7 @@ class OrderApiTests(APITestCase):
     def setUp(self):
         self.category = FoodCategory.objects.create(name="Rice")
         self.dish = Dish.objects.create(name="Fried Rice", category=self.category, description="")
+        self.allergy = Allergy.objects.create(name="Peanuts", severity="High")
 
         self.client_user = User.objects.create_user(email="client@test.com", password="secret", first_name="Client", last_name="User")
         self.client_user.user_type = "Client"
@@ -114,3 +115,48 @@ class OrderApiTests(APITestCase):
         self.client.post(status_url, {"status": Order.Status.DELIVERED}, format="json", **self._auth(self.chef_token.key))
         response = self.client.post(rating_url, {"rating": 5, "report": "Great"}, format="json", **self._auth(self.client_token.key))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_allergen_workflow_requires_client_submission_then_chef_ack(self):
+        payload = {
+            "cart": self.cart.pk,
+            "chef": self.chef_profile.pk,
+            "delivery_window_start": (timezone.now() + timedelta(hours=1)).isoformat(),
+            "delivery_window_end": (timezone.now() + timedelta(hours=2)).isoformat(),
+        }
+        order_response = self.client.post(self.order_list_url, payload, format="json", **self._auth(self.client_token.key))
+        order_id = order_response.data["id"]
+
+        report_url = reverse("orders:v2:order-report-allergens", args=[order_id])
+        response = self.client.post(
+            report_url,
+            {"allergies": [self.allergy.pk], "custom_allergy_notes": "No cross contamination"},
+            format="json",
+            **self._auth(self.client_token.key),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["reported_by_client"])
+        self.assertIn(self.allergy.pk, response.data["allergies"])
+
+        ack_url = reverse("orders:v2:order-acknowledge-allergens", args=[order_id])
+        response = self.client.post(
+            ack_url,
+            {"acknowledgement_notes": "Kitchen sanitized"},
+            format="json",
+            **self._auth(self.chef_token.key),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["acknowledged_by_chef"])
+        self.assertEqual(response.data["acknowledgement_notes"], "Kitchen sanitized")
+
+    def test_chef_cannot_acknowledge_before_client_reports(self):
+        payload = {
+            "cart": self.cart.pk,
+            "chef": self.chef_profile.pk,
+            "delivery_window_start": (timezone.now() + timedelta(hours=1)).isoformat(),
+            "delivery_window_end": (timezone.now() + timedelta(hours=2)).isoformat(),
+        }
+        order_response = self.client.post(self.order_list_url, payload, format="json", **self._auth(self.client_token.key))
+        order_id = order_response.data["id"]
+        ack_url = reverse("orders:v2:order-acknowledge-allergens", args=[order_id])
+        response = self.client.post(ack_url, {"acknowledgement_notes": ""}, format="json", **self._auth(self.chef_token.key))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

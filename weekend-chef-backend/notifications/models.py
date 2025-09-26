@@ -25,6 +25,10 @@ class NotificationPreference(models.Model):
     push_updates = models.BooleanField(default=True)
     sms_updates = models.BooleanField(default=False)
     order_status_updates = models.BooleanField(default=True)
+    marketing_updates = models.BooleanField(default=False)
+    consent_version = models.CharField(max_length=50, default="2024-09")
+    consent_source = models.CharField(max_length=100, default="app")
+    consent_updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Preferences for {self.user.email}"
